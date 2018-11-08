@@ -64,8 +64,7 @@ class dbinterface {
                 $raw_settings = sql($sql, "getRow", DB_FETCHMODE_ASSOC);
                 break;
             case "get_sccpdevice_buttons":
-                $sql = 'SELECT * FROM buttonconfig WHERE  device="' . $data['id'] . '";';
-                $raw_settings = sql($sql, "getAll", DB_FETCHMODE_ASSOC);
+
                 break;
         }
 
@@ -192,19 +191,6 @@ class dbinterface {
                 $result = $stmt->execute();
                 break;
             case 'sccpbuttons':
-                if (($mode == 'clear') || ($mode == 'delete')) {
-                    $sql = 'DELETE FROM `buttonconfig` WHERE device="' . $hwid . '";';
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute();
-                }
-                if ($mode == 'delete') {
-                    break;
-                }
-                if (!empty($save_value)) {
-                    $sql = 'INSERT INTO `buttonconfig` (`device`, `instance`, `type`, `name`, `options`) VALUES (?,?,?,?,?);';
-                    $stmt = $db->prepare($sql);
-                    $res = $db->executeMultiple($stmt, $save_value);
-                }
 
                 break;
         }

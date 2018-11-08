@@ -501,10 +501,6 @@ class Sccp_manager extends \FreePBX_Helpers implements \BMO {
                             "name" => _("Device configuration"),
                             "page" => 'views/form.adddevice.php'
                         ),
-                        "buttons" => array(
-                            "name" => _("Device Buttons"),
-                            "page" => 'views/form.buttons.php'
-                        ),
                         "sccpcodec" => array(
                             "name" => _("Device SCCP Codec"),
                             "page" => 'views/server.codec.php'
@@ -661,7 +657,7 @@ class Sccp_manager extends \FreePBX_Helpers implements \BMO {
 //                        $msg = strpos($idv, 'SEP-');
                         if ($this->strpos_array($idv, array('SEP', 'ATA', 'VG')) !== false) {
                             $this->dbinterface->sccp_save_db('sccpdevice', array('name' => $idv), 'delete', "name");
-                            $this->dbinterface->sccp_save_db("sccpbuttons", array(), 'delete', '', $idv);
+                            //$this->dbinterface->sccp_save_db("sccpbuttons", array(), 'delete', '', $idv);
                             $this->sccp_delete_device_XML($idv); // Концы в вводу !!  
 //                            $this->sccp_core_commands(array('cmd' => 'reload_phone', 'name' => $idv));
                             $this->srvinterface->sccp_core_commands(array('cmd' => 'reset_phone', 'name' => $idv));
@@ -1020,106 +1016,106 @@ class Sccp_manager extends \FreePBX_Helpers implements \BMO {
         $this->dbinterface->sccp_save_db("sccpdevice", $save_settings, 'replace');
 
 //      Get Model Buttons info
-        $lines_list = $this->dbinterface->get_db_SccpTableData('SccpExtension');
-        $max_btn = ((!empty($get_settings['buttonscount']) ? $get_settings['buttonscount'] : 100));
-        $last_btn = $max_btn;
-        for ($it = $max_btn; $it >= 0; $it--) {
-            if (!empty($get_settings['button' . $it . '_type'])) {
-                $last_btn = $it;
-                $btn_t = $get_settings['button' . $it . '_type'];
-                if ($btn_t != 'empty') {
-                    break;
-                }
-            }
-        }
-
-        for ($it = 0; $it <= $last_btn; $it++) {
-            if (!empty($get_settings['button' . $it . '_type'])) {
-                $btn_t = $get_settings['button' . $it . '_type'];
-
-                $btn_n = '';
-                $btn_opt = '';
-                if ($it == 0) {
-                    $btn_opt = 'default';
-                }
-                switch ($btn_t) {
-                    case 'feature':
-                        $btn_f = $get_settings['button' . $it . '_feature'];
-//                        $btn_opt = (empty($get_settings['button' . $it . '_fvalue'])) ? '' : $get_settings['button' . $it . '_fvalue'];
-                        $btn_n = (empty($get_settings['button' . $it . '_flabel'])) ? $def_feature[$btn_f]['name'] : $get_settings['button' . $it . '_flabel'];
-                        $btn_opt = $btn_f;
-                        if (!empty($def_feature[$btn_f]['value'])) {
-                            if (empty($get_settings['button' . $it . '_fvalue'])) {
-                                $btn_opt .= ',' . $def_feature[$btn_f]['value'];
-                            } else {
-                                $btn_opt .= ',' . $get_settings['button' . $it . '_fvalue'];
-                            }
-                        }
-                        break;
-                    case 'monitor':
-                        $btn_t = 'speeddial';
-                        $btn_opt = (string) $get_settings['button' . $it . '_line'];
-                        $db_res = $this->dbinterface->get_db_SccpTableData('SccpExtension', array('name' => $btn_opt));
-                        $btn_n = $db_res[0]['label'];
-                        $btn_opt .= ',' . $btn_opt . $this->hint_context;
-                        break;
-                    case 'speeddial':
-                        if (!empty($get_settings['button' . $it . '_input'])) {
-                            $btn_n = $get_settings['button' . $it . '_input'];
-                        }
-                        if (!empty($get_settings['button' . $it . '_phone'])) {
-                            $btn_opt = $get_settings['button' . $it . '_phone'];
-                            if (empty($btn_n)) {
-                                $btn_n = $btn_opt;
-                            }
-                        }
-
-                        if (!empty($get_settings['button' . $it . '_hint'])) {
-                            if ($get_settings['button' . $it . '_hint'] == "hint") {
-                                if (empty($btn_n)) {
-                                    $btn_t = 'line';
-                                    $btn_n = $get_settings['button' . $it . '_hline'] . '!silent';
-                                    $btn_opt = '';
-                                } else {
-                                    $btn_opt .= ',' . $get_settings['button' . $it . '_hline'] . $this->hint_context;
-                                }
-                            }
-                        }
-                        break;
-                    case 'adv.line':
-                        $btn_t = 'line';
-                        $btn_n = (string) $get_settings['button' . $it . '_line'];
-                        $btn_n .= '@' . (string) $get_settings['button' . $it . '_advline'];
-                        $btn_opt = (string) $get_settings['button' . $it . '_advopt'];
-
-                        break;
-                    case 'line':
-                    case 'silent':
-                        if (isset($get_settings['button' . $it . '_line'])) {
-                            $btn_n = (string) $get_settings['button' . $it . '_line'];
-                            if ($it > 0) {
-                                if ($btn_t == 'silent') {
-                                    $btn_n .= '!silent';
-                                    $btn_t = 'line';
-                                }
-                            }
-                        } else {
-                            $btn_t = 'empty';
-                            $btn_n = '';
-                        }
-                        break;
-                    case 'empty':
-                        $btn_t = 'empty';
-                        break;
-                }
-                if (!empty($btn_t)) {
-                    $save_buttons[] = array('device' => $name_dev, 'instance' => (string) ($it + 1), 'type' => $btn_t, 'name' => $btn_n, 'options' => $btn_opt);
-                }
-            }
-        }
+//        $lines_list = $this->dbinterface->get_db_SccpTableData('SccpExtension');
+//        $max_btn = ((!empty($get_settings['buttonscount']) ? $get_settings['buttonscount'] : 100));
+//        $last_btn = $max_btn;
+//        for ($it = $max_btn; $it >= 0; $it--) {
+//            if (!empty($get_settings['button' . $it . '_type'])) {
+//                $last_btn = $it;
+//                $btn_t = $get_settings['button' . $it . '_type'];
+//                if ($btn_t != 'empty') {
+//                    break;
+//                }
+//            }
+//        }
+//
+//        for ($it = 0; $it <= $last_btn; $it++) {
+//            if (!empty($get_settings['button' . $it . '_type'])) {
+//                $btn_t = $get_settings['button' . $it . '_type'];
+//
+//                $btn_n = '';
+//                $btn_opt = '';
+//                if ($it == 0) {
+//                    $btn_opt = 'default';
+//                }
+//                switch ($btn_t) {
+//                    case 'feature':
+//                        $btn_f = $get_settings['button' . $it . '_feature'];
+////                        $btn_opt = (empty($get_settings['button' . $it . '_fvalue'])) ? '' : $get_settings['button' . $it . '_fvalue'];
+//                        $btn_n = (empty($get_settings['button' . $it . '_flabel'])) ? $def_feature[$btn_f]['name'] : $get_settings['button' . $it . '_flabel'];
+//                        $btn_opt = $btn_f;
+//                        if (!empty($def_feature[$btn_f]['value'])) {
+//                            if (empty($get_settings['button' . $it . '_fvalue'])) {
+//                                $btn_opt .= ',' . $def_feature[$btn_f]['value'];
+//                            } else {
+//                                $btn_opt .= ',' . $get_settings['button' . $it . '_fvalue'];
+//                            }
+//                        }
+//                        break;
+//                    case 'monitor':
+//                        $btn_t = 'speeddial';
+//                        $btn_opt = (string) $get_settings['button' . $it . '_line'];
+//                        $db_res = $this->dbinterface->get_db_SccpTableData('SccpExtension', array('name' => $btn_opt));
+//                        $btn_n = $db_res[0]['label'];
+//                        $btn_opt .= ',' . $btn_opt . $this->hint_context;
+//                        break;
+//                    case 'speeddial':
+//                        if (!empty($get_settings['button' . $it . '_input'])) {
+//                            $btn_n = $get_settings['button' . $it . '_input'];
+//                        }
+//                        if (!empty($get_settings['button' . $it . '_phone'])) {
+//                            $btn_opt = $get_settings['button' . $it . '_phone'];
+//                            if (empty($btn_n)) {
+//                                $btn_n = $btn_opt;
+//                            }
+//                        }
+//
+//                        if (!empty($get_settings['button' . $it . '_hint'])) {
+//                            if ($get_settings['button' . $it . '_hint'] == "hint") {
+//                                if (empty($btn_n)) {
+//                                    $btn_t = 'line';
+//                                    $btn_n = $get_settings['button' . $it . '_hline'] . '!silent';
+//                                    $btn_opt = '';
+//                                } else {
+//                                    $btn_opt .= ',' . $get_settings['button' . $it . '_hline'] . $this->hint_context;
+//                                }
+//                            }
+//                        }
+//                        break;
+//                    case 'adv.line':
+//                        $btn_t = 'line';
+//                        $btn_n = (string) $get_settings['button' . $it . '_line'];
+//                        $btn_n .= '@' . (string) $get_settings['button' . $it . '_advline'];
+//                        $btn_opt = (string) $get_settings['button' . $it . '_advopt'];
+//
+//                        break;
+//                    case 'line':
+//                    case 'silent':
+//                        if (isset($get_settings['button' . $it . '_line'])) {
+//                            $btn_n = (string) $get_settings['button' . $it . '_line'];
+//                            if ($it > 0) {
+//                                if ($btn_t == 'silent') {
+//                                    $btn_n .= '!silent';
+//                                    $btn_t = 'line';
+//                                }
+//                            }
+//                        } else {
+//                            $btn_t = 'empty';
+//                            $btn_n = '';
+//                        }
+//                        break;
+//                    case 'empty':
+//                        $btn_t = 'empty';
+//                        break;
+//                }
+//                if (!empty($btn_t)) {
+//                    //$save_buttons[] = array('device' => $name_dev, 'instance' => (string) ($it + 1), 'type' => $btn_t, 'name' => $btn_n, 'options' => $btn_opt);
+//                }
+//            }
+//        }
 
 //      Sace Buttons config
-        $this->dbinterface->sccp_save_db("sccpbuttons", $save_buttons, $update_hw, '', $name_dev);
+        //$this->dbinterface->sccp_save_db("sccpbuttons", $save_buttons, $update_hw, '', $name_dev);
 
 //      Create Device XML 
         $this->sccp_create_device_XML($name_dev);
